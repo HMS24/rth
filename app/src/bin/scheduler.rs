@@ -1,0 +1,51 @@
+use rth::tasks;
+
+use crate::tasks::{CronJob, FiveSecondsTask};
+use chrono::Local;
+use std::time::Duration;
+use tokio_cron_scheduler::{JobScheduler, JobSchedulerError};
+
+pub struct Scheduler {
+    scheduler: JobScheduler,
+}
+
+impl Scheduler {
+    pub async fn new() -> Self {
+        Self {
+            scheduler: JobScheduler::new()
+                .await
+                .expect("Failed to create scheduler"),
+        }
+    }
+
+    pub async fn start(self) {
+        self.scheduler
+            .start()
+            .await
+            .expect("Failed to start scheduler");
+    }
+
+    pub async fn register_job<T: CronJob>(&self) {
+        self.scheduler
+            .add(T::create())
+            .await
+            .expect("Failed to add job");
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), JobSchedulerError> {
+    println!(
+        "[{}] Starting the scheduler...",
+        Local::now().format("%Y-%m-%d %H:%M:%S").to_string()
+    );
+
+    let scheduler = Scheduler::new().await;
+
+    scheduler.register_job::<FiveSecondsTask>().await;
+    scheduler.start().await;
+
+    tokio::time::sleep(Duration::from_secs(10)).await;
+
+    Ok(())
+}
