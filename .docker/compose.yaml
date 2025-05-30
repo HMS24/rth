@@ -4,7 +4,7 @@ services:
     image: rust-watch:1.87
     container_name: app
     volumes:
-      - ../src:/code_base
+      - ../app:/code_base
     command: bash -c "tail -f /dev/null"
     networks:
       - backend
