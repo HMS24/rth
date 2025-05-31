@@ -2,8 +2,9 @@ use rth::tasks;
 
 use crate::tasks::cron_job::CronJob;
 use crate::tasks::five_seconds_task::FiveSecondsTask;
+use tokio::signal;
 use tokio_cron_scheduler::{JobScheduler, JobSchedulerError};
-use tracing::info;
+use tracing::{error, info};
 
 pub struct Scheduler {
     scheduler: JobScheduler,
@@ -16,7 +17,7 @@ impl Scheduler {
         })
     }
 
-    pub async fn start(self) -> Result<(), JobSchedulerError> {
+    pub async fn start(&mut self) -> Result<(), JobSchedulerError> {
         self.scheduler.start().await?;
         Ok(())
     }
@@ -27,6 +28,11 @@ impl Scheduler {
 
         Ok(())
     }
+
+    pub async fn shutdown(&mut self) -> Result<(), JobSchedulerError> {
+        self.scheduler.shutdown().await?;
+        Ok(())
+    }
 }
 
 #[tokio::main]
@@ -35,12 +41,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Starting the scheduler...");
 
-    let scheduler = Scheduler::new().await?;
+    let mut scheduler = Scheduler::new().await?;
 
     scheduler.register_task::<FiveSecondsTask>().await?;
     scheduler.start().await?;
 
-    tokio::signal::ctrl_c().await?;
+    match signal::ctrl_c().await {
+        Ok(()) => {
+            scheduler.shutdown().await?;
+
+            info!("Scheduler shutdown completed");
+        }
+        Err(err) => {
+            error!("Unable to listen for shutdown signal: {}", err);
+        }
+    }
 
     Ok(())
 }
