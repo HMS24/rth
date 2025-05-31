@@ -22,7 +22,9 @@ impl Scheduler {
     }
 
     pub async fn register_task<T: CronJob>(&self) -> Result<(), JobSchedulerError> {
-        self.scheduler.add(T::create()).await?;
+        let task = T::create()?;
+        self.scheduler.add(task).await?;
+
         Ok(())
     }
 }
