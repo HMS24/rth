@@ -3,7 +3,6 @@ use rth::tasks;
 use crate::tasks::cron_job::CronJob;
 use crate::tasks::five_seconds_task::FiveSecondsTask;
 use chrono::Local;
-use std::time::Duration;
 use tokio_cron_scheduler::{JobScheduler, JobSchedulerError};
 
 pub struct Scheduler {
@@ -46,7 +45,7 @@ async fn main() -> Result<(), JobSchedulerError> {
     scheduler.register_job::<FiveSecondsTask>().await;
     scheduler.start().await;
 
-    tokio::time::sleep(Duration::from_secs(10)).await;
-
-    Ok(())
+    loop {
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+    }
 }
