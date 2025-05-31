@@ -1,9 +1,6 @@
+use crate::tasks::cron_job::CronJob;
 use chrono::Local;
 use tokio_cron_scheduler::Job;
-
-pub trait CronJob {
-    fn create() -> Job;
-}
 
 pub struct FiveSecondsTask;
 

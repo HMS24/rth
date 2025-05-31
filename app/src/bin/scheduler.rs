@@ -1,6 +1,7 @@
 use rth::tasks;
 
-use crate::tasks::{CronJob, FiveSecondsTask};
+use crate::tasks::cron_job::CronJob;
+use crate::tasks::five_seconds_task::FiveSecondsTask;
 use chrono::Local;
 use std::time::Duration;
 use tokio_cron_scheduler::{JobScheduler, JobSchedulerError};
