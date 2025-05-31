@@ -7,10 +7,14 @@ pub struct FiveSecondsTask;
 
 impl CronJob for FiveSecondsTask {
     fn create() -> Result<Job, JobSchedulerError> {
-        Job::new("*/5 * * * * *", |_uuid, _l| {
+        Job::new("*/5 * * * * *", |uuid, _lock| {
             let now = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
 
-            println!("[{}] I run every 5 seconds!", now);
+            println!("Task: {}, Five seconds task executed at: {}", uuid, now);
         })
+    }
+
+    fn name() -> &'static str {
+        "FiveSecondsTask"
     }
 }
