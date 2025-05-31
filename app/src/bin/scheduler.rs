@@ -2,6 +2,7 @@ use rth::tasks;
 
 use crate::tasks::cron_job::CronJob;
 use crate::tasks::five_seconds_task::FiveSecondsTask;
+use crate::tasks::ten_seconds_task::TenSecondsTask;
 use tokio::signal;
 use tokio_cron_scheduler::{JobScheduler, JobSchedulerError};
 use tracing::{error, info};
@@ -44,6 +45,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut scheduler = Scheduler::new().await?;
 
     scheduler.register_task::<FiveSecondsTask>().await?;
+    scheduler.register_task::<TenSecondsTask>().await?;
+
     scheduler.start().await?;
 
     match signal::ctrl_c().await {
