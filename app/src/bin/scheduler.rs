@@ -2,8 +2,8 @@ use rth::tasks;
 
 use crate::tasks::cron_job::CronJob;
 use crate::tasks::five_seconds_task::FiveSecondsTask;
-use chrono::Local;
 use tokio_cron_scheduler::{JobScheduler, JobSchedulerError};
+use tracing::info;
 
 pub struct Scheduler {
     scheduler: JobScheduler,
@@ -28,20 +28,17 @@ impl Scheduler {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), JobSchedulerError> {
-    println!(
-        "[{}] Starting the scheduler...",
-        Local::now().format("%Y-%m-%d %H:%M:%S").to_string()
-    );
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt::init();
+
+    info!("Starting the scheduler...");
 
     let scheduler = Scheduler::new().await?;
 
     scheduler.register_job::<FiveSecondsTask>().await?;
     scheduler.start().await?;
 
-    tokio::signal::ctrl_c()
-        .await
-        .expect("Failed to listen for Ctrl+C");
+    tokio::signal::ctrl_c().await?;
 
     Ok(())
 }
