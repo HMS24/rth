@@ -21,7 +21,7 @@ impl Scheduler {
         Ok(())
     }
 
-    pub async fn register_job<T: CronJob>(&self) -> Result<(), JobSchedulerError> {
+    pub async fn register_task<T: CronJob>(&self) -> Result<(), JobSchedulerError> {
         self.scheduler.add(T::create()).await?;
         Ok(())
     }
@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let scheduler = Scheduler::new().await?;
 
-    scheduler.register_job::<FiveSecondsTask>().await?;
+    scheduler.register_task::<FiveSecondsTask>().await?;
     scheduler.start().await?;
 
     tokio::signal::ctrl_c().await?;
