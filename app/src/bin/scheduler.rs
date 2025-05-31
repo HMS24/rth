@@ -39,7 +39,9 @@ async fn main() -> Result<(), JobSchedulerError> {
     scheduler.register_job::<FiveSecondsTask>().await?;
     scheduler.start().await?;
 
-    loop {
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-    }
+    tokio::signal::ctrl_c()
+        .await
+        .expect("Failed to listen for Ctrl+C");
+
+    Ok(())
 }
